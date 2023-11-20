@@ -15,7 +15,7 @@ const (
 
 type HashResult struct {
 	Hash []byte
-	Salt [8]byte
+	Salt []byte
 }
 
 func generateSalt() []byte {
@@ -32,7 +32,7 @@ func HashPassword(password string) HashResult {
 	saltString := generateSalt()
 	salt := bytes.NewBuffer(saltString).Bytes()
 	df := pbkdf2.Key([]byte(password), salt, iterationCount, keyLength, sha512.New)
-	return HashResult{Hash: df, Salt: [8]byte(saltString)}
+	return HashResult{Hash: df, Salt: saltString}
 }
 
 func VerifyPassword(password string, hash []byte, salt []byte) bool {

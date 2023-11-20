@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/samber/do"
-	"github.com/spf13/viper"
 	"gssm/data"
 	"gssm/types"
 	"time"
@@ -11,11 +10,11 @@ import (
 
 func (a *auth) Refresh(c *fiber.Ctx) error {
 
-	d := do.MustInvoke[data.TokenProcessor](a.inj)
+	t := do.MustInvoke[*data.TokenProcessor](a.inj)
 
-	refreshTokenCookie := c.Cookies(viper.GetString("jwt.refresh_cookie_name"))
+	refreshTokenCookie := c.Cookies(t.RefreshCookieName)
 
-	tokenIsValid, claims, err := d.VerifyToken(refreshTokenCookie)
+	tokenIsValid, claims, err := t.VerifyToken(refreshTokenCookie)
 	if err != nil || !tokenIsValid {
 		return err
 	}
@@ -24,10 +23,10 @@ func (a *auth) Refresh(c *fiber.Ctx) error {
 		return fiber.ErrUnauthorized
 	}
 
-	accessTokenCookie := c.Cookies(viper.GetString("jwt.access_cookie_name"))
+	accessTokenCookie := c.Cookies(t.AccessCookieName)
 
 	if len(accessTokenCookie) > 0 {
-		tokenIsValid, claims, err = d.VerifyToken(accessTokenCookie)
+		tokenIsValid, claims, err = t.VerifyToken(accessTokenCookie)
 		if err != nil || !tokenIsValid {
 			return err
 		}
@@ -36,30 +35,18 @@ func (a *auth) Refresh(c *fiber.Ctx) error {
 		}
 	}
 
-	accessToken, err := d.GenerateToken(claims.Id, viper.GetDuration("jwt.access_token_duration"))
+	accessToken, err := t.GenerateToken(claims.Id, t.AccessTokenDuration)
 	if err != nil {
-		return c.JSON(types.ResponseNoData{
-			Code: types.ResultOk,
-		})
+		return types.RnD(c, types.ResultTokenGenerationError)
 	}
 
-	refreshToken, err := d.GenerateToken(claims.Id, viper.GetDuration("jwt.refresh_token_duration"))
+	refreshToken, err := t.GenerateToken(claims.Id, t.RefreshTokenDuration)
 	if err != nil {
-		return c.JSON(types.ResponseNoData{
-			Code: types.ResultTokenGenerationError,
-		})
+		return types.RnD(c, types.ResultTokenGenerationError)
 	}
 
-	if err != nil {
-		return c.JSON(types.ResponseNoData{
-			Code: types.ResultTokenGenerationError,
-		})
-	}
+	c.Cookie(t.GetAccessTokenCookie(accessToken))
+	c.Cookie(t.GetRefreshTokenCookie(refreshToken))
 
-	c.Cookie(d.GetAccessTokenCookie(accessToken))
-	c.Cookie(d.GetRefreshTokenCookie(refreshToken))
-
-	return c.JSON(types.ResponseNoData{
-		Code: types.ResultOk,
-	})
+	return types.RnD(c, types.ResultOk)
 }

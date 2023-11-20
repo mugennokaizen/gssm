@@ -8,7 +8,7 @@ type Identity struct {
 
 type User struct {
 	Identity
-	Email        string  `json:"email"`
-	PasswordHash []byte  `json:"-"`
-	Salt         [8]byte `json:"-"`
+	Email        string `json:"email"`
+	PasswordHash []byte `json:"-"`
+	Salt         []byte `json:"-"`
 }

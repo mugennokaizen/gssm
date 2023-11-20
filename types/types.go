@@ -16,6 +16,9 @@ const (
 	ResultUserNotFound                    = 1003
 	ResultBadPassword                     = 1004
 	ResultTokenGenerationError            = 1005
+	ResultBadPasswordAlphabet             = 1006
+	ResultCreationUserError               = 1007
+	ResultWrongPassword                   = 1008
 )
 
 type ResponseNoData struct {

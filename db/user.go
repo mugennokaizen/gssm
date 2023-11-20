@@ -30,6 +30,14 @@ func (us *UserSource) GetUserByEmail(ctx context.Context, email string) (*User, 
 	return &user, result.Error
 }
 
+func (us *UserSource) IsUserExist(ctx context.Context, email string) bool {
+	found := false
+
+	us.db.WithContext(ctx).Raw(`select exists(select 1 from "user" where email = ?) as found`, email).Scan(&found)
+
+	return found
+}
+
 func (us *UserSource) CreateUser(ctx context.Context, email string, password string) (types.ULID, error) {
 
 	hashes := utils.HashPassword(password)

@@ -8,7 +8,6 @@ import (
 	"gssm/data"
 	"gssm/db"
 	"gssm/handlers"
-	"gssm/handlers/middlewares"
 	"log"
 	"os"
 	"os/signal"
@@ -50,14 +49,15 @@ func NewFiberServer() *fiber.App {
 	authHandler := handlers.NewAuthHandler(injector)
 	authGroup := app.Group(authHandler.GetGroup())
 	authGroup.Post("/sign-in", authHandler.SignIn)
+	authGroup.Post("/sign-up", authHandler.SignUp)
 	authGroup.Post("/refresh", authHandler.Refresh)
 
-	app.Use(middlewares.NewJwt(middlewares.JwtConfig{
-		Filter:            nil,
-		RefreshCookieName: viper.GetString("jwt.refresh_cookie_name"),
-		AccessCookieName:  viper.GetString("jwt.access_cookie_name"),
-		SecretKey:         viper.GetString("jwt.secret_key"),
-	}))
+	//app.Use(middlewares.NewJwt(middlewares.JwtConfig{
+	//	Filter:            nil,
+	//	RefreshCookieName: viper.GetString("jwt.refresh_cookie_name"),
+	//	AccessCookieName:  viper.GetString("jwt.access_cookie_name"),
+	//	SecretKey:         viper.GetString("jwt.secret_key"),
+	//}))
 
 	return app
 }
