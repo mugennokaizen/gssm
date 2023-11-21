@@ -31,7 +31,7 @@ func main() {
 }
 
 func NewFiberServer() *fiber.App {
-	viper.SetConfigName("config")
+	viper.SetConfigName("/cmd/front/config")
 	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
