@@ -14,5 +14,6 @@ func NewDatabase(inj *do.Injector) (*gorm.DB, error) {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		SkipDefaultTransaction: false,
 	})
 }
