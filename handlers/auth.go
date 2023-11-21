@@ -8,7 +8,7 @@ import (
 type AuthHandler interface {
 	GroupHandler
 	SignIn(ctx *fiber.Ctx) error
-	//SignUp(ctx *fiber.Ctx) error
+	SignUp(ctx *fiber.Ctx) error
 	Refresh(ctx *fiber.Ctx) error
 }
 
