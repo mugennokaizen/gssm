@@ -4,31 +4,27 @@ import (
 	"context"
 	"github.com/samber/do"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
+	"github.com/stretchr/testify/suite"
 	"gssm/db"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var testDbInstance *gorm.DB
-var injector *do.Injector
-
-func TestMain(m *testing.M) {
-	testDB := db.SetupTestDatabase()
-
-	testDbInstance = testDB.DbInstance
-
-	injector = do.New()
-	do.ProvideValue(injector, testDbInstance)
-	do.Provide(injector, db.NewUserSource)
-
-	os.Exit(m.Run())
+type UserTestSuite struct {
+	suite.Suite
+	inj *do.Injector
 }
 
-func TestCreateUser(t *testing.T) {
-	userSource := do.MustInvoke[*db.UserSource](injector)
+func (suite *UserTestSuite) SetupSuite() {
+	inj := db.CreateInjectorWithDb()
+	do.Provide(inj, db.NewUserSource)
+	suite.inj = inj
+}
+
+func (suite *UserTestSuite) TestCreateUser() {
+	t := suite.T()
+	userSource := do.MustInvoke[*db.UserSource](suite.inj)
 
 	_, err := userSource.CreateUser(context.Background(), "test@test.ru", "123123123")
 	if err != nil {
@@ -38,8 +34,9 @@ func TestCreateUser(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestUserExist(t *testing.T) {
-	userSource := do.MustInvoke[*db.UserSource](injector)
+func (suite *UserTestSuite) TestUserExist() {
+	t := suite.T()
+	userSource := do.MustInvoke[*db.UserSource](suite.inj)
 	email := "test@test.ru"
 	_, err := userSource.CreateUser(context.Background(), email, "123123123")
 	if err != nil {
@@ -56,8 +53,9 @@ func TestUserExist(t *testing.T) {
 	assert.False(t, res2)
 }
 
-func TestFindUser(t *testing.T) {
-	userSource := do.MustInvoke[*db.UserSource](injector)
+func (suite *UserTestSuite) TestFindUser() {
+	t := suite.T()
+	userSource := do.MustInvoke[*db.UserSource](suite.inj)
 
 	_, err := userSource.CreateUser(context.Background(), "test@test.ru", "123123123")
 	if err != nil {
@@ -71,7 +69,11 @@ func TestFindUser(t *testing.T) {
 		return
 	}
 	require.NoError(t, err)
-	assert.Equal(t, email.Email, "test@test.ru")
-	assert.Equal(t, len(email.Salt), 8)
-	assert.Equal(t, len(email.PasswordHash), 64)
+	assert.Equal(t, "test@test.ru", email.Email)
+	assert.Equal(t, 8, len(email.Salt))
+	assert.Equal(t, 64, len(email.PasswordHash))
+}
+
+func TestUserTestSuite(t *testing.T) {
+	suite.Run(t, new(UserTestSuite))
 }

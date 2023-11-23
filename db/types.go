@@ -12,3 +12,16 @@ type User struct {
 	PasswordHash []byte `json:"-"`
 	Salt         []byte `json:"-"`
 }
+
+type Project struct {
+	Identity
+	Name      string     `json:"name"`
+	CreatorId types.ULID `json:"-"`
+}
+
+type UserToProject struct {
+	Identity
+	ProjectId  types.ULID
+	UserId     types.ULID
+	Permission Permission
+}
