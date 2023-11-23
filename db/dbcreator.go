@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/samber/do"
 	"github.com/testcontainers/testcontainers-go"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,6 +31,16 @@ type TestDatabase struct {
 	DbInstance *gorm.DB
 	DbAddress  string
 	container  testcontainers.Container
+}
+
+func CreateInjectorWithDb() *do.Injector {
+	testDB := SetupTestDatabase()
+	testDbInstance := testDB.DbInstance
+
+	injector := do.New()
+	do.ProvideValue(injector, testDbInstance)
+
+	return injector
 }
 
 func SetupTestDatabase() *TestDatabase {
