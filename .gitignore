@@ -8,3 +8,6 @@
 go.work
 **/.idea/**
 
+# immudb files
+*.identity*
+*.state*
