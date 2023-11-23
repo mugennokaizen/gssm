@@ -69,9 +69,9 @@ func (suite *UserTestSuite) TestFindUser() {
 		return
 	}
 	require.NoError(t, err)
-	assert.Equal(t, email.Email, "test@test.ru")
-	assert.Equal(t, len(email.Salt), 8)
-	assert.Equal(t, len(email.PasswordHash), 64)
+	assert.Equal(t, "test@test.ru", email.Email)
+	assert.Equal(t, 8, len(email.Salt))
+	assert.Equal(t, 64, len(email.PasswordHash))
 }
 
 func TestUserTestSuite(t *testing.T) {

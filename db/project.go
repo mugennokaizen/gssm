@@ -49,7 +49,17 @@ func (ps *ProjectSource) CreateProject(ctx context.Context, name string, userId 
 	return newProject.Id, nil
 }
 
-func (ps *ProjectSource) GetProjects(ctx context.Context, userId types.ULID) ([]*Project, error) {
+func (ps *ProjectSource) ChangeProjectName(ctx context.Context, projectId types.ULID, userId types.ULID, newName string) error {
+	result := ps.db.
+		WithContext(ctx).
+		Model(&Project{}).
+		Where("creator_id = ? and id = ?", userId, projectId).
+		Update("name", newName)
+
+	return result.Error
+}
+
+func (ps *ProjectSource) GetProjects(ctx context.Context, userId types.ULID) []*Project {
 	var projects []*Project
 
 	ps.db.
@@ -59,7 +69,7 @@ func (ps *ProjectSource) GetProjects(ctx context.Context, userId types.ULID) ([]
 		Joins("inner join user_to_project as ut on ut.project_id = p.id").
 		Where("ut.user_id = ?", userId).Find(&projects)
 
-	return projects, nil
+	return projects
 }
 
 func (ps *ProjectSource) GetProjectPermissions(ctx context.Context, projectId types.ULID, userId types.ULID) Permission {

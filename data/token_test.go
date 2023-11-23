@@ -47,5 +47,5 @@ func TestVerifyToken(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.True(t, verifyToken)
-	assert.Equal(t, t2.Id, ul)
+	assert.Equal(t, ul, t2.Id)
 }

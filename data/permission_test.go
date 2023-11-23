@@ -37,8 +37,8 @@ func (suite *PermissionTestSuite) TestRemovePermission() {
 
 	p1 := db.SecretCreate | db.SecretModify | db.SecretRead
 
-	assert.EqualValues(t, suite.ps.RemovePermission(p1, db.SecretCreate), db.SecretModify|db.SecretRead)
-	assert.EqualValues(t, suite.ps.RemovePermission(p1, db.SecretModify), db.SecretCreate|db.SecretRead)
+	assert.EqualValues(t, db.SecretModify|db.SecretRead, suite.ps.RemovePermission(p1, db.SecretCreate))
+	assert.EqualValues(t, db.SecretCreate|db.SecretRead, suite.ps.RemovePermission(p1, db.SecretModify))
 
 	p2 := db.SecretRead
 
@@ -50,9 +50,9 @@ func (suite *PermissionTestSuite) TestAddPermission() {
 
 	var p1 db.Permission = db.SecretCreate
 
-	assert.EqualValues(t, suite.ps.AddPermission(p1, db.SecretRead), db.SecretCreate|db.SecretRead)
-	assert.EqualValues(t, suite.ps.AddPermission(p1, db.SecretCreate), db.SecretCreate)
-	assert.EqualValues(t, suite.ps.AddPermission(p1, db.SecretModify), db.SecretCreate|db.SecretModify)
+	assert.EqualValues(t, db.SecretCreate|db.SecretRead, suite.ps.AddPermission(p1, db.SecretRead))
+	assert.EqualValues(t, db.SecretCreate, suite.ps.AddPermission(p1, db.SecretCreate))
+	assert.EqualValues(t, db.SecretCreate|db.SecretModify, suite.ps.AddPermission(p1, db.SecretModify))
 
 }
 

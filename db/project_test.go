@@ -54,14 +54,47 @@ func (suite *ProjectTestSuite) TestCreatedPermissionsInProject() {
 	_, err = ps.CreateProject(context.Background(), "test", id)
 	require.NoError(t, err)
 
-	projects, err := ps.GetProjects(context.Background(), id)
-	require.NoError(t, err)
+	projects := ps.GetProjects(context.Background(), id)
+
+	require.Len(t, projects, 1)
 
 	for _, project := range projects {
 		permission := ps.GetProjectPermissions(context.Background(), project.Id, id)
-		assert.EqualValues(t, permission, db.SecretCreate|db.SecretModify|db.SecretRead)
+		assert.EqualValues(t, db.SecretCreate|db.SecretModify|db.SecretRead, permission)
 	}
 
+}
+
+func (suite *ProjectTestSuite) TestChangeProjectName() {
+	t := suite.T()
+	userSource := do.MustInvoke[*db.UserSource](suite.inj)
+	ps := do.MustInvoke[*db.ProjectSource](suite.inj)
+
+	id, err := userSource.CreateUser(context.Background(), "test@test.ru", "123123123")
+	if err != nil {
+		return
+	}
+
+	require.NoError(t, err)
+
+	_, err = ps.CreateProject(context.Background(), "test", id)
+	require.NoError(t, err)
+
+	projects := ps.GetProjects(context.Background(), id)
+
+	require.Len(t, projects, 1)
+
+	for _, project := range projects {
+		err = ps.ChangeProjectName(context.Background(), project.Id, id, "blabla")
+
+		require.NoError(t, err)
+	}
+
+	projects = ps.GetProjects(context.Background(), id)
+
+	for _, project := range projects {
+		assert.Equal(t, "blabla", project.Name)
+	}
 }
 
 func TestProjectTestSuite(t *testing.T) {
