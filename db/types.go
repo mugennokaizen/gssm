@@ -25,3 +25,10 @@ type UserToProject struct {
 	UserId     types.ULID
 	Permission Permission
 }
+
+type SecretGroup struct {
+	Identity
+	Name      string
+	Prefix    string
+	ProjectId types.ULID
+}
