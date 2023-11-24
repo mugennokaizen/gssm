@@ -51,7 +51,7 @@ func (suite *ImmuTestSuite) TestSet() {
 func (suite *ImmuTestSuite) TestGet() {
 
 	val := "bla-bla-bla-bla-bla-bla"
-	ulid := types.ULID(ulid.Make().String())
+	ul := types.ULID(ulid.Make().String())
 	im := do.MustInvoke[*immu.Manager](suite.inj)
 
 	t := suite.T()
@@ -59,10 +59,10 @@ func (suite *ImmuTestSuite) TestGet() {
 	err := im.Open(context.Background())
 	require.NoError(t, err)
 
-	err = im.SetSecret(context.Background(), ulid, "group", "key", val)
+	err = im.SetSecret(context.Background(), ul, "group", "key", val)
 	require.NoError(t, err)
 
-	value, err := im.GetSecret(context.Background(), ulid, "group", "key")
+	value, err := im.GetSecret(context.Background(), ul, "group", "key")
 
 	require.NoError(t, err)
 	assert.EqualValues(t, val, value)
