@@ -8,6 +8,7 @@ import (
 	"gssm/data"
 	"gssm/db"
 	"gssm/handlers"
+	"gssm/immu"
 	"log"
 	"os"
 	"os/signal"
@@ -43,6 +44,9 @@ func NewFiberServer() *fiber.App {
 	do.Provide(injector, db.NewDatabase)
 	do.Provide(injector, db.NewUserSource)
 	do.Provide(injector, data.NewTokenProcessor)
+
+	do.Provide(injector, immu.NewDatabase)
+	do.Provide(injector, immu.NewManager)
 
 	app := fiber.New()
 
