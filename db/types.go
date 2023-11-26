@@ -5,6 +5,14 @@ import (
 	"time"
 )
 
+type Permission int
+
+const (
+	SecretRead   Permission = 1 << iota
+	SecretModify            = 1 << iota
+	SecretCreate            = 1 << iota
+)
+
 type Identity struct {
 	Id types.ULID `json:"-" gorm:"primaryKey;type:ulid;default:gen_ulid()"`
 }
