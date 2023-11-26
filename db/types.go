@@ -1,6 +1,9 @@
 package db
 
-import "gssm/types"
+import (
+	"gssm/types"
+	"time"
+)
 
 type Identity struct {
 	Id types.ULID `json:"-" gorm:"primaryKey;type:ulid;default:gen_ulid()"`
@@ -31,4 +34,14 @@ type SecretGroup struct {
 	Name      string
 	Prefix    string
 	ProjectId types.ULID
+}
+
+type AccessKey struct {
+	Identity
+	ProjectId types.ULID
+	UserID    types.ULID
+	Mask      string
+	Key       string
+	Signature []byte
+	Expires   *time.Time
 }
