@@ -21,7 +21,6 @@ func NewAesProcessor(_ *do.Injector) (*AesProcessor, error) {
 	if len(key) != 32 {
 		panic(errors.New("master AES key must be length of 32"))
 	}
-
 	return &AesProcessor{
 		MasterKey: key,
 	}, nil
@@ -56,17 +55,17 @@ func (a *AesProcessor) Decrypt(s string) (string, error) {
 	data, err := hex.DecodeString(s)
 
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	c, err := aes.NewCipher(a.MasterKey)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	gcm, err := cipher.NewGCM(c)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	nonceSize := gcm.NonceSize()
@@ -77,7 +76,7 @@ func (a *AesProcessor) Decrypt(s string) (string, error) {
 	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	return string(plaintext), nil
