@@ -87,7 +87,7 @@ func (suite *AccessKeyTestSuite) TestGetAccessKey() {
 
 	assert.Equal(t, key, accessKeyDb.Key)
 	assert.EqualValues(t, project, accessKeyDb.ProjectId)
-	assert.EqualValues(t, id, accessKeyDb.UserID)
+	assert.EqualValues(t, id, accessKeyDb.UserId)
 	assert.Equal(t, mask, accessKeyDb.Mask)
 	assert.Nil(t, accessKeyDb.Expires)
 	assert.Len(t, accessKeyDb.Signature, 64)

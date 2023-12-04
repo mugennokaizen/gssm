@@ -24,7 +24,7 @@ func (ps *AccessKeySource) Create(ctx context.Context, key, mask string, userId,
 	group := AccessKey{
 		Identity:  Identity{},
 		ProjectId: projectId,
-		UserID:    userId,
+		UserId:    userId,
 		Mask:      mask,
 		Key:       key,
 		Signature: signature,
