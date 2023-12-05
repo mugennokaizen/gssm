@@ -5,9 +5,13 @@
 *.dylib
 *.test
 *.out
+.
 go.work
 **/.idea/**
 
 # immudb files
 *.identity*
 *.state*
+
+**/c
+**/gssm
