@@ -2,8 +2,7 @@ package immu
 
 import (
 	"fmt"
-	immudb "github.com/codenotary/immudb/pkg/client"
-	"github.com/samber/do"
+	"github.com/docker/go-connections/nat"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"golang.org/x/net/context"
@@ -18,24 +17,15 @@ const (
 )
 
 type TestImmu struct {
-	Client    immudb.ImmuClient
 	container testcontainers.Container
-}
-
-func CreateInjectorWithImmu() *do.Injector {
-	testDB := SetupTestImmu()
-
-	injector := do.New()
-	do.ProvideValue(injector, testDB.Client)
-
-	return injector
+	Port      nat.Port
 }
 
 func SetupTestImmu() *TestImmu {
 
 	// setup db container
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
-	container, client, err := createContainer(ctx)
+	container, port, err := createContainer(ctx)
 	if err != nil {
 		log.Fatal("failed to setup test", err)
 	}
@@ -44,11 +34,11 @@ func SetupTestImmu() *TestImmu {
 
 	return &TestImmu{
 		container: container,
-		Client:    client,
+		Port:      port,
 	}
 }
 
-func createContainer(ctx context.Context) (testcontainers.Container, immudb.ImmuClient, error) {
+func createContainer(ctx context.Context) (testcontainers.Container, nat.Port, error) {
 	var port = "3322/tcp"
 	var port2 = "9497/tcp"
 
@@ -67,24 +57,17 @@ func createContainer(ctx context.Context) (testcontainers.Container, immudb.Immu
 	container, err := testcontainers.GenericContainer(ctx, req)
 
 	if err != nil {
-		return container, nil, fmt.Errorf("failed to start container: %v", err)
+		return container, "", fmt.Errorf("failed to start container: %v", err)
 	}
 
 	p, err := container.MappedPort(ctx, "3322")
 	if err != nil {
-		return container, nil, fmt.Errorf("failed to get container external port: %v", err)
+		return container, "", fmt.Errorf("failed to get container external port: %v", err)
 	}
 
 	log.Println("immudb container ready and running at port: ", p.Port())
 
 	time.Sleep(time.Second)
 
-	opts := immudb.DefaultOptions().
-		WithAddress("localhost").
-		WithPort(3322)
-	client := immudb.NewClient().WithOptions(opts)
-
-	immuClient := immudb.ImmuClient(client)
-
-	return container, immuClient, nil
+	return container, p, nil
 }

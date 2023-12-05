@@ -1,6 +1,7 @@
 package immu_test
 
 import (
+	"fmt"
 	"github.com/oklog/ulid/v2"
 	"github.com/samber/do"
 	"github.com/spf13/viper"
@@ -19,15 +20,18 @@ type ImmuTestSuite struct {
 }
 
 func (suite *ImmuTestSuite) SetupSuite() {
-	inj := immu.CreateInjectorWithImmu()
+	ti := immu.SetupTestImmu()
+	fmt.Println(ti.Port)
+	inj := do.New()
 	t := suite.T()
-	t.Setenv("user", "immudb")
 	t.Setenv("immu.user", "immudb")
 	t.Setenv("immu.password", "immudb")
 	t.Setenv("immu.db", "defaultdb")
+	t.Setenv("immu.port", ti.Port.Port())
 
 	viper.AutomaticEnv()
 
+	do.Provide(inj, immu.NewDatabase)
 	do.Provide(inj, immu.NewManager)
 	suite.inj = inj
 }
