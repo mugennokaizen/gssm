@@ -3,6 +3,7 @@ module gssm
 go 1.21.1
 
 require (
+	github.com/BurntSushi/toml v1.3.2
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/brianvoe/gofakeit/v6 v6.24.0
 	github.com/charmbracelet/bubbles v0.16.1
