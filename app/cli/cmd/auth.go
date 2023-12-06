@@ -6,9 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/samber/do"
 	"gssm/config"
-	"gssm/db"
 	"gssm/utils"
 	"os"
 	"strings"
@@ -23,8 +21,6 @@ var (
 )
 
 type authModel struct {
-	inj *do.Injector
-
 	masterKeyInput textinput.Model
 
 	masterKey string
@@ -32,7 +28,7 @@ type authModel struct {
 	password  string
 }
 
-func initialModel(inj *do.Injector) authModel {
+func initialModel() authModel {
 	ti := textinput.New()
 	ti.Placeholder = "Master key"
 	ti.Focus()
@@ -43,7 +39,6 @@ func initialModel(inj *do.Injector) authModel {
 
 	return authModel{
 		masterKeyInput: ti,
-		inj:            inj,
 	}
 }
 
@@ -112,12 +107,9 @@ func init() {
 			}
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			config.ReadConfigFromHomeDirToViper()
 			config.ReadCliConfigFromHomeDirToViper()
-			inj := do.New()
-			do.Provide(inj, db.NewDatabase)
-			do.Provide(inj, db.NewUserSource)
-			p := tea.NewProgram(initialModel(inj))
+
+			p := tea.NewProgram(initialModel())
 			if _, err := p.Run(); err != nil {
 				fmt.Printf("error %s", err)
 				os.Exit(1)
