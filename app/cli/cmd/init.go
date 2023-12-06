@@ -47,6 +47,7 @@ var initCmd = &cobra.Command{
 		gssmPath := filepath.Join(homeDir, ".gssm")
 
 		configPath := filepath.Join(gssmPath, "example.toml")
+		cliConfigPath := filepath.Join(gssmPath, "cli")
 
 		if _, err := os.Stat(gssmPath); errors.Is(err, os.ErrNotExist) {
 			err := os.Mkdir(gssmPath, os.ModePerm)
@@ -57,6 +58,13 @@ var initCmd = &cobra.Command{
 
 		if _, err := os.Stat(configPath); errors.Is(err, os.ErrNotExist) {
 			err = os.WriteFile(configPath, []byte(exampleConfig), 0644)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		if _, err := os.Stat(cliConfigPath); errors.Is(err, os.ErrNotExist) {
+			err = os.WriteFile(cliConfigPath, []byte{}, 0644)
 			if err != nil {
 				panic(err)
 			}
