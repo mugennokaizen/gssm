@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/samber/do"
+	"gssm/config"
 	"gssm/data"
 	"gssm/db"
 	"gssm/handlers"
 	"gssm/immu"
-	"gssm/utils"
 	"log"
 	"os"
 	"os/signal"
@@ -33,7 +33,7 @@ func main() {
 
 func NewFiberServer() *fiber.App {
 
-	utils.ReadConfigFromHomeDir()
+	config.ReadConfigFromHomeDirToViper()
 
 	injector := do.New()
 	do.Provide(injector, db.NewDatabase)
