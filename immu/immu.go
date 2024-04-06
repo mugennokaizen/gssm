@@ -9,7 +9,14 @@ import (
 	"gssm/types"
 )
 
-type Manager struct {
+type Manager interface {
+	openSession(ctx context.Context) error
+	closeSession(ctx context.Context) error
+	SetSecret(ctx context.Context, groupUlid types.ULID, group, key, value string) error
+	GetSecret(ctx context.Context, groupUlid types.ULID, group, key string) (string, error)
+}
+
+type manager struct {
 	client   immudb.ImmuClient
 	user     []byte
 	password []byte
@@ -31,14 +38,14 @@ func NewDatabase(_ *do.Injector) (immudb.ImmuClient, error) {
 	return immuClient, nil
 }
 
-func NewManager(inj *do.Injector) (*Manager, error) {
+func NewManager(inj *do.Injector) (Manager, error) {
 	client := do.MustInvoke[immudb.ImmuClient](inj)
 
 	user := viper.GetString("immu.user")
 	password := viper.GetString("immu.password")
 	db := viper.GetString("immu.db")
 
-	return &Manager{
+	return &manager{
 		client:   client,
 		user:     []byte(user),
 		password: []byte(password),
@@ -46,16 +53,25 @@ func NewManager(inj *do.Injector) (*Manager, error) {
 	}, nil
 }
 
-func (m *Manager) Open(ctx context.Context) error {
+func (m *manager) openSession(ctx context.Context) error {
 	return m.client.OpenSession(ctx, m.user, m.password, m.db)
 }
 
-func (m *Manager) Close(ctx context.Context) error {
+func (m *manager) closeSession(ctx context.Context) error {
 	return m.client.CloseSession(ctx)
 }
 
-func (m *Manager) SetSecret(ctx context.Context, groupUlid types.ULID, group, key, value string) error {
-	_, err := m.client.VerifiedSet(
+func (m *manager) SetSecret(ctx context.Context, groupUlid types.ULID, group, key, value string) error {
+
+	err := m.openSession(ctx)
+	defer func() {
+		_ = m.closeSession(ctx)
+	}()
+	if err != nil {
+		return err
+	}
+
+	_, err = m.client.VerifiedSet(
 		ctx,
 		[]byte(fmt.Sprintf("%s.%s.%s", groupUlid, group, key)),
 		[]byte(value),
@@ -67,7 +83,17 @@ func (m *Manager) SetSecret(ctx context.Context, groupUlid types.ULID, group, ke
 	return nil
 }
 
-func (m *Manager) GetSecret(ctx context.Context, groupUlid types.ULID, group, key string) (string, error) {
+func (m *manager) GetSecret(ctx context.Context, groupUlid types.ULID, group, key string) (string, error) {
+
+	err := m.openSession(ctx)
+	defer func() {
+		_ = m.closeSession(ctx)
+	}()
+
+	if err != nil {
+		return "", err
+	}
+
 	entry, err := m.client.Get(
 		ctx,
 		[]byte(fmt.Sprintf("%s.%s.%s", groupUlid, group, key)),
